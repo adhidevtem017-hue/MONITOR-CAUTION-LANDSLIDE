@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Student Monitor</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1d1d1b;--mut:#6b6a64;--line:#e2e0d8;--c0:#2e8b57;--c1:#d9a400;--c2:#e8741a;--c3:#d32f2f;--btn:#1d1d1b;--btnt:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161614;--card:#222220;--ink:#efede6;--mut:#a09e96;--line:#363633;--c0:#4cc38a;--c1:#f0c030;--c2:#ff9040;--c3:#ff5a5a;--btn:#efede6;--btnt:#161614}}
+:root[data-theme="dark"]{--bg:#161614;--card:#222220;--ink:#efede6;--mut:#a09e96;--line:#363633;--c0:#4cc38a;--c1:#f0c030;--c2:#ff9040;--c3:#ff5a5a;--btn:#efede6;--btnt:#161614}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:560px;margin:0 auto;padding:18px}
+h1{font-size:22px;margin:6px 0 2px}
+.sub{color:var(--mut);font-size:14px}
+button{font:inherit;border-radius:12px;padding:14px 16px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;width:100%}
+button.main{background:var(--btn);color:var(--btnt);border:0;font-size:18px;padding:20px;margin-top:20px}
+button.bt{margin-top:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:14px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:14px}
+.row span:first-child{color:var(--mut)}
+.ok{color:var(--c0)}.bad{color:var(--c3)}
+.banner{border-radius:14px;padding:18px;color:#fff;margin-top:12px}
+.banner b{font-size:26px;display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.grid .card{margin:0}
+.big{font-size:26px;font-weight:600}
+svg{width:100%;height:70px;display:block}
+#log{font-size:13px;max-height:150px;overflow-y:auto}
+#log div{padding:4px 0;border-bottom:1px solid var(--line)}
+.hide{display:none}
+.back{width:auto;padding:8px 12px;font-size:14px}
+
+.site{max-width:760px;margin:0 auto;padding:0 18px}
+.hero{padding:44px 0 26px;text-align:center}
+.hero h1{font-size:34px;line-height:1.15;margin:0 0 10px}
+.hero p{color:var(--mut);max-width:560px;margin:0 auto 20px;font-size:17px}
+.hero a,.cta{display:inline-block;background:var(--btn);color:var(--btnt);text-decoration:none;border-radius:12px;padding:14px 22px;font-weight:600;margin:4px}
+.hero a.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+section.s{padding:26px 0}
+section.s h2{font-size:22px;margin:0 0 12px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.steps .card{margin:0}
+.steps b{display:block;margin-bottom:4px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:8px;border-bottom:1px solid var(--line);text-align:left}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+details{margin-top:12px}
+pre{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px}
+.warn{border-left:4px solid var(--c2)}
+footer{padding:30px 0 40px;text-align:center;color:var(--mut);font-size:13px}
+</style>
+</head>
+<body>
+<div id="app"><div class="site"><div class="hero">
+<h1>Student Monitor</h1>
+<p>Landslide detection and slope monitoring. A low-cost early-warning aid. An ESP32 motion sensor on the slope sends live readings over Bluetooth to this page, which shows the risk level in real time.</p>
+<a href="#app">Open the Landslide Monitor</a><a class="alt" href="#how">How it works</a></div>
+<section class="s" id="how"><h2>How it works</h2><div class="steps">
+<div class="card"><b>1. Install the sensor</b>Fix an ESP32 with an MPU6050 motion sensor on the slope or retaining wall.</div>
+<div class="card"><b>2. Connect</b>Open this page in Chrome or Edge, press Connect ESP32 (Bluetooth) and pick LandslideNode.</div>
+<div class="card"><b>3. Monitor</b>Tilt, vibration and motion events are scored as Low, Watch, Warning or Critical.</div></div></section>
+<section class="s" id="appwrap"><h2>Live monitor</h2></section></div>
+<div class="wrap">
+
+<div id="home">
+ <h1>Student Monitor</h1>
+ <div class="sub">Slope motion monitoring with an ESP32 sensor node</div>
+ <button class="main" id="goMon">Landslide Monitor</button>
+ <button class="bt" id="btnConnectHome">Connect ESP32 (Bluetooth)</button>
+ <div class="card">
+  <b>App self-test</b>
+  <div class="row"><span>Secure page (HTTPS)</span><span id="t1"></span></div>
+  <div class="row"><span>Bluetooth supported by this browser</span><span id="t2"></span></div>
+  <div class="row"><span>ESP32 connection</span><span id="t3"></span></div>
+  <div class="row"><span>Live data received</span><span id="t4"></span></div>
+  <button class="bt" id="demoBtn">Run demo (no hardware needed)</button>
+  <div class="sub" style="margin-top:8px">The demo sends fake sensor readings through the same code path as the ESP32. If the monitor reacts, the app works.</div>
+ </div>
+ <div class="sub" id="homeMsg" style="margin-top:10px"></div>
+</div>
+
+<div id="mon" class="hide">
+ <button class="back" id="goHome">← Back</button>
+ <h1>Landslide Monitor</h1>
+ <div class="sub" id="conn">Not connected</div>
+ <button class="bt" id="btnConnectMon">Connect ESP32 (Bluetooth)</button>
+ <div class="banner" id="banner" style="background:var(--mut)"><b id="lvl">WAITING</b><span id="act">Connect the sensor or run the demo.</span></div>
+ <div class="grid">
+  <div class="card"><div class="sub">Tilt change</div><div class="big" id="vTilt">–</div></div>
+  <div class="card"><div class="sub">Vibration</div><div class="big" id="vVib">–</div></div>
+  <div class="card"><div class="sub">Motion events (10 s)</div><div class="big" id="vMot">0</div></div>
+  <div class="card"><div class="sub">Readings received</div><div class="big" id="vCnt">0</div></div>
+ </div>
+ <div class="card"><div class="sub">Vibration history</div><svg viewBox="0 0 100 40" preserveAspectRatio="none" id="spark"></svg></div>
+ <div class="card"><b>Event log</b><div id="log"></div></div>
+ <button class="bt" id="rebase">Reset baseline (set current position as normal)</button>
+</div>
+
+</div></div>
+<div class="site">
+<section class="s"><h2>Alert levels</h2><div class="card"><table>
+<tr><th>Level</th><th>Tilt change</th><th>Vibration</th><th>Action</th></tr>
+<tr><td><span class="dot" style="background:var(--c0)"></span>Low</td><td>&lt; 2°</td><td>&lt; 0.05 g</td><td>Routine monitoring</td></tr>
+<tr><td><span class="dot" style="background:var(--c1)"></span>Watch</td><td>2–4°</td><td>0.05–0.15 g</td><td>Inspect the slope</td></tr>
+<tr><td><span class="dot" style="background:var(--c2)"></span>Warning</td><td>4–7°</td><td>0.15–0.3 g</td><td>Restrict access</td></tr>
+<tr><td><span class="dot" style="background:var(--c3)"></span>Critical</td><td>&gt; 7°</td><td>&gt; 0.3 g</td><td>Evacuate</td></tr></table></div></section>
+<section class="s"><h2>Build the sensor node</h2><div class="card">
+<b>Parts:</b> ESP32 board and MPU6050 sensor.<br><b>Wiring:</b> VCC to 3.3V, GND to GND, SDA to pin 21, SCL to pin 22.<br>
+<details><summary>ESP32 Arduino sketch (copy into Arduino IDE)</summary><pre>// ESP32 + MPU6050 (I2C: SDA=21, SCL=22) -&gt; Bluetooth LE -&gt; Landslide app
+#include &lt;BLEDevice.h&gt;
+#include &lt;BLEServer.h&gt;
+#include &lt;BLEUtils.h&gt;
+#include &lt;BLE2902.h&gt;
+#include &lt;Wire.h&gt;
+
+#define SVC "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
+#define TX  "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
+
+BLECharacteristic *tx;
+bool connected = false;
+
+class CB : public BLEServerCallbacks {
+  void onConnect(BLEServer *s) { connected = true; }
+  void onDisconnect(BLEServer *s) { connected = false; BLEDevice::startAdvertising(); }
+};
+
+int16_t read16() {
+  int16_t hi = Wire.read();
+  int16_t lo = Wire.read();
+  return (hi &lt;&lt; 8) | lo;
+}
+
+void setup() {
+  Wire.begin();
+  Wire.beginTransmission(0x68); Wire.write(0x6B); Wire.write(0); Wire.endTransmission(true); // wake MPU6050
+
+  BLEDevice::init("LandslideNode");
+  BLEServer *s = BLEDevice::createServer();
+  s-&gt;setCallbacks(new CB());
+  BLEService *v = s-&gt;createService(SVC);
+  tx = v-&gt;createCharacteristic(TX, BLECharacteristic::PROPERTY_NOTIFY);
+  tx-&gt;addDescriptor(new BLE2902());
+  v-&gt;start();
+  BLEDevice::getAdvertising()-&gt;addServiceUUID(SVC);
+  BLEDevice::startAdvertising();
+}
+
+void loop() {
+  Wire.beginTransmission(0x68); Wire.write(0x3B); Wire.endTransmission(false);
+  Wire.requestFrom(0x68, 6, true);
+  float ax = read16() / 16384.0;
+  float ay = read16() / 16384.0;
+  float az = read16() / 16384.0;
+  if (connected) {
+    String m = String(ax, 2) + "," + String(ay, 2) + "," + String(az, 2) + "\n"; // e.g. 0.01,-0.02,0.99
+    tx-&gt;setValue(m.c_str());
+    tx-&gt;notify();
+  }
+  delay(200);
+}
+</pre></details></div></section>
+<section class="s"><div class="card warn"><b>Important safety notice</b><br>This is a monitoring aid and is not an official landslide warning system. Thresholds are illustrative and must be calibrated for each site by a qualified geotechnical engineer. Never rely on it alone for life-safety decisions; follow guidance from local authorities.</div></section>
+<section class="s"><h2>Compatibility</h2><div class="card">Bluetooth works in Chrome or Edge on Android and desktop. iPhone browsers do not support Web Bluetooth. Use Run demo to try the monitor without hardware.</div></section>
+<footer>Student Monitor · Landslide Detection System</footer></div>
+<script>
+const NUS="6e400001-b5a3-f393-e0a9-e50e24dcca9e",TXC="6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+const $=id=>document.getElementById(id);
+const COL=["--c0","--c1","--c2","--c3"],NAME=["LOW","WATCH","WARNING","CRITICAL"],ACT=["Normal. Routine monitoring.","Slight movement. Inspect the slope.","Significant movement. Restrict access.","Major movement. Evacuate now."];
+let base=null,buf="",count=0,hist=[],motion=[],lastLvl=-1,connected=false,demoTimer=null,lastData=0,dev=null;
+const cl=(x,a,b)=>Math.min(b,Math.max(a,x));
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v)}
+function log(m){const d=document.createElement("div");d.textContent=new Date().toLocaleTimeString()+" — "+m;$("log").prepend(d)}
+function show(v){$("home").classList.toggle("hide",v!=="home");$("mon").classList.toggle("hide",v!=="mon")}
+$("goMon").onclick=()=>show("mon");
+$("goHome").onclick=()=>show("home");
+$("rebase").onclick=()=>{base=null;log("Baseline reset")};
+
+function tests(){
+ const set=(id,ok,txt)=>{$(id).textContent=txt;$(id).className=ok?"ok":"bad"};
+ set("t1",window.isSecureContext,window.isSecureContext?"Pass":"Fail");
+ set("t2",!!navigator.bluetooth,navigator.bluetooth?"Pass":"No (use Chrome on Android or desktop)");
+ set("t3",connected,connected?"Connected":"Not connected");
+ const live=Date.now()-lastData<4000;
+ set("t4",live,live?"Yes":"No");
+ $("conn").textContent=connected?"Connected to "+(dev&&dev.name||"ESP32"):(demoTimer?"Demo mode running":"Not connected");
+}
+setInterval(tests,1000);tests();
+
+function level(tilt,vib){
+ const now=Date.now();motion=motion.filter(t=>now-t<10000);
+ const m=motion.length;
+ const a=tilt<2?0:tilt<4?1:tilt<7?2:3;
+ const b=vib<0.05?0:vib<0.15?1:vib<0.3?2:3;
+ const c=m<3?0:m<6?1:m<10?2:3;
+ return Math.max(a,b,c);
+}
+function handleLine(line){
+ const p=line.trim().split(",").map(Number);
+ if(!p.length||p.some(isNaN))return;
+ count++;lastData=Date.now();
+ let tilt=+($("vTilt").dataset.v||0),vib=+($("vVib").dataset.v||0);
+ if(p.length>=3){
+  const [x,y,z]=p,mag=Math.hypot(x,y,z)||1;
+  if(!base){base=[x,y,z];log("Baseline set")}
+  const bm=Math.hypot(...base)||1;
+  const dot=(x*base[0]+y*base[1]+z*base[2])/(mag*bm);
+  tilt=Math.acos(cl(dot,-1,1))*180/Math.PI;
+  vib=Math.abs(mag-1);
+ }else if(p[0]>0){motion.push(Date.now())}
+ $("vTilt").dataset.v=tilt;$("vVib").dataset.v=vib;
+ hist.push(vib);if(hist.length>60)hist.shift();
+ const l=level(tilt,vib);
+ $("vTilt").textContent=tilt.toFixed(1)+"°";
+ $("vVib").textContent=vib.toFixed(2)+" g";
+ $("vMot").textContent=motion.length;
+ $("vCnt").textContent=count;
+ $("lvl").textContent=NAME[l];$("act").textContent=ACT[l];
+ $("banner").style.background=css(COL[l]);
+ if(l!==lastLvl){log("Level: "+NAME[l]);lastLvl=l}
+ const pts=hist.map((v,i)=>(i/Math.max(hist.length-1,1)*100).toFixed(1)+","+(38-cl(v/0.5,0,1)*36).toFixed(1)).join(" ");
+ $("spark").innerHTML='<polyline fill="none" stroke="'+css("--c2")+'" stroke-width="1.5" vector-effect="non-scaling-stroke" points="'+pts+'"/>';
+}
+function onData(text){
+ buf+=text;let i;
+ while((i=buf.indexOf("\n"))>=0){handleLine(buf.slice(0,i));buf=buf.slice(i+1)}
+}
+
+async function connectBle(){
+ const msg=t=>{$("homeMsg").textContent=t;log(t)};
+ if(!navigator.bluetooth){msg("This browser has no Web Bluetooth. Open the link in Chrome on Android or desktop.");return}
+ try{
+  dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[NUS]});
+  dev.addEventListener("gattserverdisconnected",()=>{connected=false;log("ESP32 disconnected");tests()});
+  const srv=await dev.gatt.connect();
+  const svc=await srv.getPrimaryService(NUS);
+  const ch=await svc.getCharacteristic(TXC);
+  await ch.startNotifications();
+  const dec=new TextDecoder();
+  ch.addEventListener("characteristicvaluechanged",e=>onData(dec.decode(e.target.value)));
+  connected=true;stopDemo();base=null;
+  msg("Connected to "+(dev.name||"ESP32"));show("mon");tests();
+ }catch(e){
+  msg("Could not connect: "+(e.message||e));
+ }
+}
+$("btnConnectHome").onclick=connectBle;
+$("btnConnectMon").onclick=connectBle;
+
+function stopDemo(){if(demoTimer){clearInterval(demoTimer);demoTimer=null;$("demoBtn").textContent="Run demo (no hardware needed)"}}
+$("demoBtn").onclick=()=>{
+ if(demoTimer){stopDemo();return}
+ base=null;let t=0;$("demoBtn").textContent="Stop demo";show("mon");log("Demo started");
+ demoTimer=setInterval(()=>{
+  t++;const n=()=>(Math.random()-.5);
+  let s=t<15?0.01:t<30?0.08:t<45?0.25:0.5;
+  const ang=t<15?0:(t-15)*0.25*Math.PI/180;
+  const x=Math.sin(ang)+n()*s*0.4,y=n()*s*0.2,z=Math.cos(ang)+n()*s;
+  onData(x.toFixed(2)+","+y.toFixed(2)+","+z.toFixed(2)+"\n");
+  if(t>60)t=0;
+ },300);
+};
+</script>
+</body>
+</html>
